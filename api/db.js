@@ -16,7 +16,9 @@ router.createDb = function( db ){
   return new Promise( ( resolve, reject ) => {
     if( db ){
       var headers = { 'Accept': 'application/json' };
-      if( settings.db_basic ){
+      if( settings.db_token ){
+        headers['Authorization'] = 'Bearer ' + settings.db_token;
+      }else if( settings.db_basic ){
         headers['Authorization'] = 'Basic ' + settings.db_basic;
       }
       var option = {
@@ -43,7 +45,9 @@ router.createDoc = function( db, doc, id ){
     if( db ){
       //var id = generateId();
       var headers = { 'Accept': 'application/json' };
-      if( settings.db_basic ){
+      if( settings.db_token ){
+        headers['Authorization'] = 'Bearer ' + settings.db_token;
+      }else if( settings.db_basic ){
         headers['Authorization'] = 'Basic ' + settings.db_basic;
       }
       var option = {
@@ -69,7 +73,9 @@ router.createDoc = function( db, doc, id ){
 router.getDbs = function( limit, start ){
   return new Promise( ( resolve, reject ) => {
     var headers = { 'Accept': 'application/json' };
-    if( settings.db_basic ){
+    if( settings.db_token ){
+      headers['Authorization'] = 'Bearer ' + settings.db_token;
+    }else if( settings.db_basic ){
       headers['Authorization'] = 'Basic ' + settings.db_basic;
     }
     var url = settings.db_url + '/_all_dbs';
@@ -103,7 +109,9 @@ router.getDoc = function( db, id ){
     if( db ){
       if( id ){
         var headers = { 'Accept': 'application/json' };
-        if( settings.db_basic ){
+        if( settings.db_token ){
+          headers['Authorization'] = 'Bearer ' + settings.db_token;
+        }else if( settings.db_basic ){
           headers['Authorization'] = 'Basic ' + settings.db_basic;
         }
         var option = {
@@ -133,7 +141,9 @@ router.getDocs = function( db, limit, start ){
   return new Promise( ( resolve, reject ) => {
     if( db ){
       var headers = { 'Accept': 'application/json' };
-      if( settings.db_basic ){
+      if( settings.db_token ){
+        headers['Authorization'] = 'Bearer ' + settings.db_token;
+      }else if( settings.db_basic ){
         headers['Authorization'] = 'Basic ' + settings.db_basic;
       }
       var url = settings.db_url + '/' + db + '/_all_docs?include_docs=true';
@@ -176,7 +186,9 @@ router.updateDoc = function( db, doc ){
         resolve( { status: false, error: 'id needed.' } );
       }else{
         var headers = { 'Accept': 'application/json' };
-        if( settings.db_basic ){
+        if( settings.db_token ){
+          headers['Authorization'] = 'Bearer ' + settings.db_token;
+        }else if( settings.db_basic ){
           headers['Authorization'] = 'Basic ' + settings.db_basic;
         }
         var option = {
@@ -217,7 +229,9 @@ router.deleteDb = function( db ){
   return new Promise( ( resolve, reject ) => {
     if( db ){
       var headers = { 'Accept': 'application/json' };
-      if( settings.db_basic ){
+      if( settings.db_token ){
+        headers['Authorization'] = 'Bearer ' + settings.db_token;
+      }else if( settings.db_basic ){
         headers['Authorization'] = 'Basic ' + settings.db_basic;
       }
       var option = {
@@ -246,9 +260,11 @@ router.deleteDoc = function( db, id ){
         resolve( { status: false, error: 'id needed.' } );
       }else{
         var headers = { 'Accept': 'application/json' };
-        if( settings.db_basic ){
-          headers['Authorization'] = 'Basic ' + settings.db_basic;
-        }
+      if( settings.db_token ){
+        headers['Authorization'] = 'Bearer ' + settings.db_token;
+      }else if( settings.db_basic ){
+        headers['Authorization'] = 'Basic ' + settings.db_basic;
+      }
         var option = {
           url: settings.db_url + '/' + db + '/' + id,
           method: 'GET',
