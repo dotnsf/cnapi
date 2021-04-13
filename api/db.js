@@ -15,12 +15,7 @@ router.use( bodyParser.json() );
 router.createDb = function( db ){
   return new Promise( ( resolve, reject ) => {
     if( db ){
-      var headers = { 'Accept': 'application/json' };
-      if( settings.db_token ){
-        headers['Authorization'] = 'Bearer ' + settings.db_token;
-      }else if( settings.db_basic ){
-        headers['Authorization'] = 'Basic ' + settings.db_basic;
-      }
+      var headers = generateHeaders();
       var option = {
         url: settings.db_url + '/' + db,
         method: 'PUT',
@@ -44,12 +39,7 @@ router.createDoc = function( db, doc, id ){
   return new Promise( ( resolve, reject ) => {
     if( db ){
       //var id = generateId();
-      var headers = { 'Accept': 'application/json' };
-      if( settings.db_token ){
-        headers['Authorization'] = 'Bearer ' + settings.db_token;
-      }else if( settings.db_basic ){
-        headers['Authorization'] = 'Basic ' + settings.db_basic;
-      }
+      var headers = generateHeaders();
       var option = {
         url: settings.db_url + '/' + db + '/' + id,
         method: 'PUT',
@@ -72,12 +62,7 @@ router.createDoc = function( db, doc, id ){
 //. 複数件取得用関数
 router.getDbs = function( limit, start ){
   return new Promise( ( resolve, reject ) => {
-    var headers = { 'Accept': 'application/json' };
-    if( settings.db_token ){
-      headers['Authorization'] = 'Bearer ' + settings.db_token;
-    }else if( settings.db_basic ){
-      headers['Authorization'] = 'Basic ' + settings.db_basic;
-    }
+    var headers = generateHeaders();
     var url = settings.db_url + '/_all_dbs';
     if( limit ){
       url += '?limit=' + limit;
@@ -108,12 +93,7 @@ router.getDoc = function( db, id ){
   return new Promise( ( resolve, reject ) => {
     if( db ){
       if( id ){
-        var headers = { 'Accept': 'application/json' };
-        if( settings.db_token ){
-          headers['Authorization'] = 'Bearer ' + settings.db_token;
-        }else if( settings.db_basic ){
-          headers['Authorization'] = 'Basic ' + settings.db_basic;
-        }
+        var headers = generateHeaders();
         var option = {
           url: settings.db_url + '/' + db + '/' + id,
           method: 'GET',
@@ -140,12 +120,7 @@ router.getDoc = function( db, id ){
 router.getDocs = function( db, limit, start ){
   return new Promise( ( resolve, reject ) => {
     if( db ){
-      var headers = { 'Accept': 'application/json' };
-      if( settings.db_token ){
-        headers['Authorization'] = 'Bearer ' + settings.db_token;
-      }else if( settings.db_basic ){
-        headers['Authorization'] = 'Basic ' + settings.db_basic;
-      }
+      var headers = generateHeaders();
       var url = settings.db_url + '/' + db + '/_all_docs?include_docs=true';
       if( limit ){
         url += '&limit=' + limit;
@@ -185,12 +160,7 @@ router.updateDoc = function( db, doc ){
       if( !doc._id ){
         resolve( { status: false, error: 'id needed.' } );
       }else{
-        var headers = { 'Accept': 'application/json' };
-        if( settings.db_token ){
-          headers['Authorization'] = 'Bearer ' + settings.db_token;
-        }else if( settings.db_basic ){
-          headers['Authorization'] = 'Basic ' + settings.db_basic;
-        }
+        var headers = generateHeaders();
         var option = {
           url: settings.db_url + '/' + db + '/' + doc._id,
           method: 'GET',
@@ -228,12 +198,7 @@ router.updateDoc = function( db, doc ){
 router.deleteDb = function( db ){
   return new Promise( ( resolve, reject ) => {
     if( db ){
-      var headers = { 'Accept': 'application/json' };
-      if( settings.db_token ){
-        headers['Authorization'] = 'Bearer ' + settings.db_token;
-      }else if( settings.db_basic ){
-        headers['Authorization'] = 'Basic ' + settings.db_basic;
-      }
+      var headers = generateHeaders();
       var option = {
         url: settings.db_url + '/' + db,
         method: 'DELETE',
@@ -259,12 +224,7 @@ router.deleteDoc = function( db, id ){
       if( !id ){
         resolve( { status: false, error: 'id needed.' } );
       }else{
-        var headers = { 'Accept': 'application/json' };
-      if( settings.db_token ){
-        headers['Authorization'] = 'Bearer ' + settings.db_token;
-      }else if( settings.db_basic ){
-        headers['Authorization'] = 'Basic ' + settings.db_basic;
-      }
+        var headers = generateHeaders();
         var option = {
           url: settings.db_url + '/' + db + '/' + id,
           method: 'GET',
@@ -435,6 +395,18 @@ function generateId(){
   var id = '' + ( new Date().getTime().toString(16) ) + Math.floor( s * Math.random() ).toString(16);
 
   return id;
+}
+
+//. ヘッダー生成
+function generateHeaders(){
+  var headers = { 'Accept': 'application/json' };
+  if( settings.db_token ){
+    headers['Authorization'] = 'Bearer ' + settings.db_token;
+  }else if( settings.db_basic ){
+    headers['Authorization'] = 'Basic ' + settings.db_basic;
+  }
+
+  return headers;
 }
 
 //. router をエクスポート
