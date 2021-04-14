@@ -15,11 +15,10 @@ router.use( bodyParser.json() );
 router.createDb = function( db ){
   return new Promise( ( resolve, reject ) => {
     if( db ){
-      var headers = generateHeaders();
       var option = {
         url: settings.db_url + '/' + db,
         method: 'PUT',
-        headers: headers
+        headers: db_headers
       };
       request( option, ( err, res, body ) => {
         if( err ){
@@ -39,12 +38,11 @@ router.createDoc = function( db, doc, id ){
   return new Promise( ( resolve, reject ) => {
     if( db ){
       //var id = generateId();
-      var headers = generateHeaders();
       var option = {
         url: settings.db_url + '/' + db + '/' + id,
         method: 'PUT',
         json: doc,
-        headers: headers
+        headers: db_headers
       };
       request( option, ( err, res, body ) => {
         if( err ){
@@ -62,7 +60,6 @@ router.createDoc = function( db, doc, id ){
 //. 複数件取得用関数
 router.getDbs = function( limit, start ){
   return new Promise( ( resolve, reject ) => {
-    var headers = generateHeaders();
     var url = settings.db_url + '/_all_dbs';
     if( limit ){
       url += '?limit=' + limit;
@@ -75,7 +72,7 @@ router.getDbs = function( limit, start ){
     var option = {
       url: url,
       method: 'GET',
-      headers: headers
+      headers: db_headers
     };
     request( option, ( err, res, dbs ) => {
       if( err ){
@@ -93,11 +90,10 @@ router.getDoc = function( db, id ){
   return new Promise( ( resolve, reject ) => {
     if( db ){
       if( id ){
-        var headers = generateHeaders();
         var option = {
           url: settings.db_url + '/' + db + '/' + id,
           method: 'GET',
-          headers: headers
+          headers: db_headers
         };
         request( option, ( err, res, doc ) => {
           if( err ){
@@ -120,7 +116,6 @@ router.getDoc = function( db, id ){
 router.getDocs = function( db, limit, start ){
   return new Promise( ( resolve, reject ) => {
     if( db ){
-      var headers = generateHeaders();
       var url = settings.db_url + '/' + db + '/_all_docs?include_docs=true';
       if( limit ){
         url += '&limit=' + limit;
@@ -131,7 +126,7 @@ router.getDocs = function( db, limit, start ){
       var option = {
         url: url,
         method: 'GET',
-        headers: headers
+        headers: db_headers
       };
       request( option, ( err, res, body ) => {
         if( err ){
@@ -160,11 +155,10 @@ router.updateDoc = function( db, doc ){
       if( !doc._id ){
         resolve( { status: false, error: 'id needed.' } );
       }else{
-        var headers = generateHeaders();
         var option = {
           url: settings.db_url + '/' + db + '/' + doc._id,
           method: 'GET',
-          headers: headers
+          headers: db_headers
         };
         request( option, ( err, res, body ) => {
           if( err ){
@@ -175,7 +169,7 @@ router.updateDoc = function( db, doc ){
               url: settings.db_url + '/' + db + '/' + doc._id + '?rev=' + body._rev,
               method: 'PUT',
               json: doc,
-              headers: headers
+              headers: db_headers
             };
             request( option, ( err, res, result ) => {
               if( err ){
@@ -198,11 +192,10 @@ router.updateDoc = function( db, doc ){
 router.deleteDb = function( db ){
   return new Promise( ( resolve, reject ) => {
     if( db ){
-      var headers = generateHeaders();
       var option = {
         url: settings.db_url + '/' + db,
         method: 'DELETE',
-        headers: headers
+        headers: db_headers
       };
       request( option, ( err, res, body ) => {
         if( err ){
@@ -224,11 +217,10 @@ router.deleteDoc = function( db, id ){
       if( !id ){
         resolve( { status: false, error: 'id needed.' } );
       }else{
-        var headers = generateHeaders();
         var option = {
           url: settings.db_url + '/' + db + '/' + id,
           method: 'GET',
-          headers: headers
+          headers: db_headers
         };
         request( option, ( err, res, doc ) => {
           if( err ){
@@ -238,7 +230,7 @@ router.deleteDoc = function( db, id ){
             option = {
               url: settings.db_url + '/' + db + '/' + id + '?rev=' + doc._rev,
               method: 'DELETE',
-              headers: headers
+              headers: db_headers
             };
             request( option, ( err, res, body ) => {
               if( err ){
@@ -397,16 +389,32 @@ function generateId(){
   return id;
 }
 
-//. ヘッダー生成
-function generateHeaders(){
-  var headers = { 'Accept': 'application/json' };
-  if( settings.db_token ){
-    headers['Authorization'] = 'Bearer ' + settings.db_token;
-  }else if( settings.db_basic ){
-    headers['Authorization'] = 'Basic ' + settings.db_basic;
-  }
-
-  return headers;
+//. DB REST API ヘッダ
+var db_headers = { 'Accept': 'application/json' };
+if( settings.db_basic ){
+  db_headers['Authorization'] = 'Basic ' + settings.db_basic;
+}else if( settings.db_apikey ){
+  var headers = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'Accept': 'application/json'
+  };
+  var data = {
+    'grant_type': 'urn:ibm:params:oauth:grant-type:apikey',
+    'apikey': settings.db_apikey
+  };
+  var option = {
+    url: 'https://iam.cloud.ibm.com/identity/token',
+    method: 'POST',
+    form: data,
+    headers: headers
+  };
+  request( option, ( err, res, body ) => {
+    if( err ){
+    }else if( body ){
+      body = JSON.parse( body );
+      db_headers['Authorization'] = 'Bearer ' + body.access_token;
+    }
+  });
 }
 
 //. router をエクスポート
